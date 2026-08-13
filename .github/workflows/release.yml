@@ -1,0 +1,58 @@
+name: release
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Install git-cliff
+        uses: taiki-e/install-action@82cd3e7658a6f96c86c0234aeeda1748937cb0a1 # v2.85.13
+        with:
+          tool: git-cliff
+
+      - name: Generate changelog and release notes
+        run: |
+          git cliff --output CHANGELOG.md
+          git cliff --current --strip header --output RELEASE_NOTES.md
+
+      - name: Publish release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          body_path: RELEASE_NOTES.md
+
+      - name: Commit changelog to main
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          cp CHANGELOG.md "$RUNNER_TEMP/CHANGELOG.md"
+          git fetch origin main
+          git switch --force-create main origin/main
+          cp "$RUNNER_TEMP/CHANGELOG.md" CHANGELOG.md
+
+          git add CHANGELOG.md
+          if git diff --cached --quiet; then
+            echo "CHANGELOG.md is already up to date"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: update changelog for ${TAG_NAME}"
+          git push origin main

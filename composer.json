@@ -1,0 +1,59 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "matfire/commonmark-directives",
+    "description": "A CommonMark extension for text, leaf, and container directives.",
+    "keywords": ["commonmark", "directives", "markdown"],
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": "^8.4",
+        "league/commonmark": "^2.10",
+        "psr/container": "^2.0"
+    },
+    "require-dev": {
+        "pestphp/pest": "^5.0",
+        "pestphp/pest-plugin-type-coverage": "^5.0",
+        "laravel/pint": "^1.29"
+    },
+    "autoload": {
+        "psr-4": {
+            "Matfire\\CommonMarkDirectives\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Matfire\\CommonMarkDirectives\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+      "lint": [
+          "vendor/bin/pint --parallel"
+      ],
+      "lint:check": [
+          "vendor/bin/pint --parallel --test"
+      ],
+      "analyse": [
+          "vendor/bin/phpstan analyse"
+      ],
+      "test:types": [
+          "vendor/bin/pest --type-coverage --min=100"
+      ],
+      "test:unit": [
+          "vendor/bin/pest --parallel"
+      ],
+      "test": [
+          "@analyse",
+          "@lint:check",
+          "@test:types",
+          "@test:unit"
+      ]
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        },
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
